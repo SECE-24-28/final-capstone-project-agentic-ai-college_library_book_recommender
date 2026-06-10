@@ -1,0 +1,13 @@
+[project]
+name = "final-capstone-project-agentic-ai-college-library-book-recommender"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=2.2.6",
+    "pandas>=2.3.3",
+    "scikit-learn>=1.7.2",
+    "sentence-transformers>=5.5.1",
+    "torch>=2.12.0",
+]
