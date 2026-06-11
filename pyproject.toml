@@ -5,8 +5,10 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "groq>=1.4.0",
     "numpy>=2.2.6",
     "pandas>=2.3.3",
+    "python-dotenv>=1.2.2",
     "scikit-learn>=1.7.2",
     "sentence-transformers>=5.5.1",
     "torch>=2.12.0",
