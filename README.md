@@ -1,438 +1,356 @@
-# 📚 Library Book Recommendation System
-### An Agentic AI Project using Claude API
-
----
-
-## Table of Contents
-
-1. [Project Overview](#project-overview)
-2. [Project Title & Objective](#project-title--objective)
-3. [Tech Stack](#tech-stack)
-4. [System Architecture](#system-architecture)
-5. [Agentic AI Concepts Used](#agentic-ai-concepts-used)
-6. [Features](#features)
-7. [File Structure](#file-structure)
-8. [How It Works — Step by Step](#how-it-works--step-by-step)
-9. [API Integration](#api-integration)
-10. [Prompt Engineering](#prompt-engineering)
-11. [UI & Frontend Design](#ui--frontend-design)
-12. [Sample Input & Output](#sample-input--output)
-13. [Error Handling](#error-handling)
-14. [How to Run / Deploy](#how-to-run--deploy)
-15. [Future Enhancements](#future-enhancements)
-16. [Learning Outcomes](#learning-outcomes)
-17. [References](#references)
-
----
+# AI-Powered College Library Book Recommender
 
 ## Project Overview
 
-The **Library Book Recommendation System** is an Agentic AI application that acts as an intelligent virtual librarian. When a user provides a topic of interest and optionally selects a genre, the system invokes the **Claude AI API** (Anthropic) to reason about the user's needs and return exactly **5 curated, personalised book recommendations** — complete with titles, authors, reasons for recommendation, and descriptive tags.
+The AI-Powered College Library Book Recommender is an intelligent recommendation system that helps students discover relevant books based on their interests, topics, book titles, or ISBN numbers.
 
-This project demonstrates core **Agentic AI** principles: a user provides high-level intent, and an AI agent autonomously reasons, plans, and delivers structured, actionable output.
+The system combines Semantic Search, Hybrid Recommendation Techniques, and Large Language Models (LLMs) to provide accurate and explainable recommendations. Instead of simply matching keywords, the system understands the meaning of user queries using text embeddings and recommends books that are semantically related.
 
----
-
-## Project Title & Objective
-
-**Title:** Library Book Recommendation System using Agentic AI
-
-**Objective:**
-> To build an intelligent, conversational recommendation system that uses an AI agent (Claude) to understand user interests and recommend 5 relevant books with personalised justifications, simulating the experience of consulting a knowledgeable librarian.
-
-**Key Goals:**
-- Understand and apply the concept of an AI agent acting on behalf of a user
-- Integrate the Anthropic Claude API for natural language reasoning
-- Design a clean, accessible, and interactive user interface
-- Parse and render structured AI output (JSON) as a polished UI
-- Implement robust error handling for real-world reliability
+To improve transparency, the system also generates AI-powered explanations describing why each book was recommended and what topics it covers.
 
 ---
 
-## Tech Stack
+# Project Objective
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | HTML5, CSS3, Vanilla JavaScript |
-| AI / LLM | Anthropic Claude API (`claude-sonnet-4-20250514`) |
-| Fonts | Google Fonts — Playfair Display, DM Sans |
-| Icons | Tabler Icons (outline webfont) |
-| Hosting | Claude.ai Artifacts (iframe sandbox) |
-| API Protocol | REST — `POST /v1/messages` |
+To build an intelligent library assistant that:
 
----
-
-## System Architecture
-
-```
-┌──────────────────────────────────────────────────────┐
-│                    USER INTERFACE                     │
-│  ┌──────────────┐   ┌────────────┐   ┌────────────┐  │
-│  │ Interest     │   │  Genre     │   │ Recommend  │  │
-│  │ Text Input   │   │  Dropdown  │   │   Button   │  │
-│  └──────────────┘   └────────────┘   └────────────┘  │
-└───────────────────────────┬──────────────────────────┘
-                            │ User submits query
-                            ▼
-┌──────────────────────────────────────────────────────┐
-│                  JAVASCRIPT LAYER                     │
-│  - Reads user input (interest + genre)               │
-│  - Constructs structured prompt                      │
-│  - Calls Anthropic API via fetch()                   │
-│  - Parses JSON response                              │
-│  - Renders book cards to DOM                         │
-└───────────────────────────┬──────────────────────────┘
-                            │ POST /v1/messages
-                            ▼
-┌──────────────────────────────────────────────────────┐
-│              ANTHROPIC CLAUDE API                     │
-│  Model: claude-sonnet-4-20250514                     │
-│  - Receives structured prompt                        │
-│  - Reasons about user's interest                     │
-│  - Selects 5 appropriate books                       │
-│  - Returns structured JSON array                     │
-└───────────────────────────┬──────────────────────────┘
-                            │ JSON response
-                            ▼
-┌──────────────────────────────────────────────────────┐
-│                  RENDERED OUTPUT                      │
-│  5 Book Cards — each with:                           │
-│    • Title & Author                                  │
-│    • Personalised Reason                             │
-│    • Genre/Mood Tags                                 │
-│    • Colour-coded Book Spine                         │
-└──────────────────────────────────────────────────────┘
-```
+* Understands natural language search queries
+* Recommends relevant books from a large library dataset
+* Explains why each book matches the user's interest
+* Supports ISBN-based book lookup
+* Demonstrates practical applications of AI, NLP, Semantic Search, and Generative AI
 
 ---
 
-## Agentic AI Concepts Used
+# Technologies Used
 
-This project directly applies the following Agentic AI concepts:
+## Programming Language
 
-### 1. Goal-Directed Behaviour
-The agent is given a high-level user goal ("recommend books about X") and autonomously decides *which* books to select and *why* — without being explicitly told which books exist.
+* Python
 
-### 2. Reasoning & Planning
-Claude internally reasons: "The user is interested in X. Given genre preference Y, which 5 books best serve their curiosity, learning goals, or entertainment needs?" — this is implicit chain-of-thought planning.
+## AI & Machine Learning
 
-### 3. Structured Output Generation
-The agent is instructed to produce output in a strict JSON schema. This is a key agentic pattern: the LLM's output becomes machine-readable data that drives downstream UI rendering.
+* Sentence Transformers (all-MiniLM-L6-v2)
+* Semantic Embeddings
+* Cosine Similarity
 
-### 4. Tool Use Simulation
-The Anthropic API call acts as an *agent invocation* — the frontend "delegates" the recommendation task to an intelligent agent and awaits its structured response.
+## Generative AI
 
-### 5. Single-Turn Agent Loop
-This project implements a **single-turn agentic loop**:
-```
-User Intent → Agent Activation → Reasoning → Structured Output → UI Render
-```
+* Groq API
+* Llama 3.3 70B Versatile
 
----
+## Data Processing
 
-## Features
+* Pandas
+* NumPy
 
-- **Natural Language Input** — Users describe their interest in plain English
-- **Genre Filtering** — Optional genre dropdown (Fiction, Sci-fi, Mystery, Biography, History, etc.)
-- **AI-Powered Recommendations** — 5 books recommended by Claude with personalised justifications
-- **Structured JSON Parsing** — AI output is parsed and rendered as interactive cards
-- **Book Tags** — Each book includes mood/theme tags for quick scanning
-- **Animated UI** — Staggered fade-in animations for each book card reveal
-- **Loading States** — Rotating status messages during AI inference
-- **Error Handling** — Graceful fallback UI when the API fails
-- **Enter Key Support** — Press Enter in the text field to trigger recommendation
-- **Colour-Coded Spines** — Visual variety across the 5 book cards
-- **Accessible Design** — Screen-reader friendly with ARIA labels and `sr-only` headings
+## Machine Learning Utilities
+
+* Scikit-learn
+
+## Environment Management
+
+* Python Dotenv
 
 ---
 
-## File Structure
+# Dataset
 
-```
+The project uses a book dataset containing:
+
+* ISBN13
+* ISBN10
+* Title
+* Subtitle
+* Authors
+* Categories
+* Description
+* Published Year
+* Average Rating
+* Ratings Count
+* Number of Pages
+
+The dataset contains thousands of books from multiple categories including:
+
+* Computer Science
+* Fiction
+* History
+* Biography
+* Mystery
+* Adventure
+* Education
+* Self Development
+
+---
+
+# System Architecture
+
+User Query
+↓
+Sentence Transformer
+↓
+Query Embedding
+↓
+Cosine Similarity Search
+↓
+Hybrid Ranking Engine
+↓
+Top Matching Books
+↓
+Groq LLM
+↓
+AI Explanation Generation
+↓
+Final Recommendations
+
+---
+
+# Key Features
+
+## 1. Semantic Search
+
+Users can search naturally:
+
+Examples:
+
+* Artificial Intelligence
+* Machine Learning
+* Java Programming
+* Data Structures
+* Ancient History
+
+The system understands meaning rather than exact keyword matching.
+
+---
+
+## 2. Hybrid Recommendation Engine
+
+Recommendations are ranked using:
+
+Final Score =
+0.60 × Semantic Similarity
++
+0.20 × Category Match
++
+0.20 × Popularity Score
+
+Where:
+
+Popularity Score considers:
+
+* Average Rating
+* Number of Ratings
+
+This improves recommendation quality beyond simple similarity search.
+
+---
+
+## 3. Explainable AI
+
+For every recommendation, the system generates:
+
+* Why the book matches the query
+* Main topics covered
+* Difficulty level
+* Recommended audience
+
+Example:
+
+Why This Book Matches
+
+You searched for "Java Programming".
+
+This book focuses on object-oriented programming, Java fundamentals, classes, inheritance, exception handling, and software development principles. It is highly relevant because Java is the primary topic covered throughout the book.
+
+Difficulty Level:
+Beginner
+
+Recommended For:
+
+* Students
+* Java Learners
+* Placement Preparation
+
+---
+
+## 4. ISBN Search
+
+Users can search using ISBN numbers.
+
+Example:
+
+9780002005883
+
+The system retrieves:
+
+* Title
+* Author
+* Category
+* Description
+
+It then generates an AI-powered summary using Groq.
+
+---
+
+## 5. AI Book Summarization
+
+The LLM analyzes book descriptions and generates:
+
+* Book Summary
+* Topics Covered
+* Difficulty Level
+* Recommended Audience
+
+---
+
+# Project Workflow
+
+Step 1
+
+User enters:
+
+* Book title
+  OR
+* Topic
+  OR
+* ISBN
+
+Step 2
+
+The query is converted into a numerical embedding using SentenceTransformer.
+
+Step 3
+
+Cosine similarity is calculated between the query embedding and all stored book embeddings.
+
+Step 4
+
+Hybrid ranking combines:
+
+* Semantic similarity
+* Category relevance
+* Popularity score
+
+Step 5
+
+Top recommendations are selected.
+
+Step 6
+
+Groq LLM generates human-readable explanations.
+
+Step 7
+
+Results are displayed to the user.
+
+---
+
+# AI Concepts Used
+
+## Natural Language Processing
+
+Converts text into machine-understandable representations.
+
+## Semantic Embeddings
+
+Represents books and queries as vectors in high-dimensional space.
+
+## Vector Search
+
+Finds books with meanings similar to the user's query.
+
+## Cosine Similarity
+
+Measures semantic closeness between vectors.
+
+## Explainable AI
+
+Provides reasoning behind recommendations.
+
+## Retrieval-Augmented Generation (RAG-style Workflow)
+
+Retrieval:
+Book recommendations from dataset
+
+Generation:
+Explanations generated by Groq LLM
+
+---
+
+# Project Structure
+
 library-book-recommender/
-│
-├── index.html          # Main application file (self-contained)
-│   ├── <style>         # All CSS — design tokens, layout, animations
-│   ├── <body>          # HTML structure — input form, status bar, book grid
-│   └── <script>        # JavaScript — API call, JSON parsing, DOM rendering
-│
-└── README.md           # This file
-```
 
-> Note: The application is intentionally built as a single-file artifact for portability and easy deployment inside Claude.ai.
+├── app.py
 
----
+├── src/
 
-## How It Works — Step by Step
+│   ├── preprocess.py
 
-### Step 1 — User Input
-The user types their interest (e.g., *"ancient civilisations"*) and optionally selects a genre from the dropdown (e.g., *"History"*).
+│   └── recommender.py
 
-### Step 2 — Prompt Construction
-JavaScript builds a structured natural language prompt:
-```
-You are a knowledgeable librarian. A library patron is interested in:
-"ancient civilisations". Genre preference: history.
+├── data/
 
-Recommend exactly 5 books. Respond ONLY with a JSON array...
-```
+│   └── books.csv
 
-### Step 3 — API Call
-The prompt is sent to the Anthropic Claude API via a `fetch()` POST request to `https://api.anthropic.com/v1/messages`.
+├── models/
 
-### Step 4 — AI Reasoning
-Claude processes the prompt and returns a JSON array of 5 books, each with:
-- `title` — Book title
-- `author` — Author's full name
-- `reason` — 2-3 sentence personalised justification
-- `tags` — Array of 2-4 descriptive tags
+│   └── book_embeddings.pkl
 
-### Step 5 — Parsing & Rendering
-JavaScript strips any markdown fences from the response, parses the JSON, and dynamically renders 5 book cards in the UI with staggered animation delays.
+├── .env
 
-### Step 6 — Display
-The user sees 5 beautifully presented book recommendations, each with a coloured spine icon, title, author, reason, and tags.
+├── requirements.txt
+
+└── README.md
 
 ---
 
-## API Integration
+# Environment Variables
 
-### Endpoint
-```
-POST https://api.anthropic.com/v1/messages
-```
+The Groq API key is stored securely in:
 
-### Request Body
-```json
-{
-  "model": "claude-sonnet-4-20250514",
-  "max_tokens": 1000,
-  "messages": [
-    {
-      "role": "user",
-      "content": "<constructed prompt>"
-    }
-  ]
-}
-```
+.env
 
-### Response Structure
-```json
-{
-  "content": [
-    {
-      "type": "text",
-      "text": "[{\"title\":\"...\",\"author\":\"...\",\"reason\":\"...\",\"tags\":[...]}]"
-    }
-  ]
-}
-```
+Example:
 
-### Response Extraction
-```javascript
-const raw = data.content
-  ?.filter(b => b.type === 'text')
-  .map(b => b.text)
-  .join('');
+GROQ_API_KEY=your_api_key_here
 
-const clean = raw.replace(/```json|```/g, '').trim();
-const books = JSON.parse(clean);
-```
+The .env file is excluded from GitHub using .gitignore.
 
 ---
 
-## Prompt Engineering
+# Future Enhancements
 
-The system uses a **role-based, constrained output prompt** — a key technique in agentic AI development.
-
-### Prompt Template
-```
-You are a knowledgeable librarian. A library patron is interested in: "{interest}".
-{genreNote}
-
-Recommend exactly 5 books. Respond ONLY with a JSON array (no markdown, no preamble):
-[
-  {
-    "title": "Book Title",
-    "author": "Author Name",
-    "reason": "2-3 sentence personalised reason why this book matches the patron's interest",
-    "tags": ["tag1", "tag2", "tag3"]
-  }
-]
-```
-
-### Why This Prompt Works Well
-
-| Technique | Purpose |
-|-----------|---------|
-| Role assignment (`"You are a knowledgeable librarian"`) | Sets persona and domain expertise |
-| Explicit count (`"exactly 5 books"`) | Prevents under/over-generation |
-| `"Respond ONLY with a JSON array"` | Forces structured, parseable output |
-| `"no markdown, no preamble"` | Prevents JSON wrapped in code fences or prose |
-| Personalised reason field | Grounds recommendations in user's stated interest |
-| Tags field | Adds scannability and metadata |
+* React Frontend
+* FastAPI Backend
+* User Login System
+* Personalized Recommendations
+* Recommendation History
+* Book Cover Retrieval
+* Voice Search
+* Multi-language Support
+* Vector Database Integration (FAISS / ChromaDB)
+* Library Chatbot
+* Full RAG Pipeline
 
 ---
 
-## UI & Frontend Design
+# Learning Outcomes
 
-### Design Philosophy
-The UI follows an **editorial / warm library aesthetic** — combining the classical feel of a library with modern, clean digital design.
+Through this project, the following concepts were implemented:
 
-### Typography
-- **Playfair Display** — Serif display font for book titles and headings; evokes the classic feel of printed books
-- **DM Sans** — Clean sans-serif for body text, labels, and UI elements
-
-### Colour Palette
-- **Book Spine Background:** `#2C1810` (dark walnut brown)
-- **Spine Text:** `#F5E6D0` (aged paper cream)
-- **Book Spines:** 5 rotating pastel colours (purple, teal, coral, blue, amber) from CSS design tokens
-- **Surfaces:** CSS variables for automatic light/dark mode support
-
-### Key UI Components
-- **Header** — Icon + title + subtitle
-- **Input Row** — Text field + genre select + recommend button
-- **Status Bar** — Animated dot + rotating loading messages
-- **Book Cards** — Spine icon + book number + title + author + reason + tags
-- **Empty State** — Placeholder with icon when no books are loaded
-- **Error Box** — Danger-styled error message for API failures
-
-### Animations
-- Cards fade up with staggered delays (`animation-delay: N * 80ms`)
-- Loading dot pulses (`opacity` keyframe animation)
-- Button hover uses `opacity` transition
+* Semantic Search
+* Sentence Embeddings
+* Cosine Similarity
+* Hybrid Recommendation Systems
+* Explainable AI
+* Generative AI APIs
+* Environment Variable Security
+* Retrieval-Augmented Generation Concepts
+* Real-world AI Application Development
 
 ---
 
-## Sample Input & Output
+# Conclusion
 
-### Input
-```
-Interest: "dystopian societies and human resistance"
-Genre:    Fiction
-```
-
-### Output (AI-generated JSON, rendered as cards)
-```json
-[
-  {
-    "title": "1984",
-    "author": "George Orwell",
-    "reason": "A foundational dystopian novel exploring totalitarian control and one man's desperate resistance against a surveillance state. Its themes of doublethink, propaganda, and suppressed rebellion are directly relevant to your interest.",
-    "tags": ["dystopia", "totalitarianism", "classic", "political"]
-  },
-  {
-    "title": "The Handmaid's Tale",
-    "author": "Margaret Atwood",
-    "reason": "Set in the theocratic Republic of Gilead, this novel follows Offred's quiet but determined resistance in a world where women have lost all autonomy. A powerful meditation on power, identity, and survival.",
-    "tags": ["dystopia", "feminism", "resistance", "speculative"]
-  },
-  ...
-]
-```
-
----
-
-## Error Handling
-
-The application handles the following failure scenarios:
-
-| Scenario | Handling |
-|----------|---------|
-| Empty input field | Input gains focus; no API call made |
-| API network failure | `catch` block shows error card + error box |
-| Malformed JSON response | `JSON.parse` throws; caught and shown as error |
-| Empty books array | Explicit check throws and shows error state |
-| API rate limit / auth error | Generic error message displayed |
-
-```javascript
-try {
-  const res = await fetch('https://api.anthropic.com/v1/messages', { ... });
-  const data = await res.json();
-  const books = JSON.parse(clean);
-  if (!Array.isArray(books) || books.length === 0) throw new Error('No books returned');
-  // render books...
-} catch (err) {
-  errorBox.textContent = 'Something went wrong. Please try again.';
-  errorBox.style.display = 'block';
-}
-```
-
----
-
-## How to Run / Deploy
-
-### Option 1 — Claude.ai Artifact (Current Setup)
-The application runs as a self-contained artifact inside Claude.ai. The Anthropic API key is handled automatically by the platform — no configuration needed.
-
-### Option 2 — Local HTML File
-1. Save the full HTML as `index.html`
-2. Add your Anthropic API key to the `fetch()` headers:
-   ```javascript
-   headers: {
-     'Content-Type': 'application/json',
-     'x-api-key': 'YOUR_API_KEY_HERE',
-     'anthropic-version': '2023-06-01'
-   }
-   ```
-3. Open `index.html` in a browser — note that CORS restrictions may apply; use a local server:
-   ```bash
-   npx serve .
-   # or
-   python -m http.server 8080
-   ```
-
-### Option 3 — Deploy to Netlify / Vercel
-1. Wrap the API call in a serverless function to keep the API key server-side
-2. Deploy static files to Netlify / Vercel
-3. Call your serverless proxy endpoint instead of the Anthropic API directly
-
----
-
-## Future Enhancements
-
-| Feature | Description |
-|---------|-------------|
-| Multi-turn conversation | Let users ask follow-up questions like "Can you suggest something shorter?" |
-| Save favourites | Persist liked books to localStorage or a backend |
-| Book cover images | Fetch cover art from Open Library API |
-| Reading level filter | Add a filter for children, YA, adult audiences |
-| Export list | Download recommendations as PDF or send via email |
-| Voice input | Use Web Speech API for hands-free queries |
-| Goodreads integration | Link each recommendation to its Goodreads page |
-| Feedback loop | Thumbs up/down per card to refine future recommendations |
-| Multi-agent pipeline | One agent selects books, another writes reviews, a third fact-checks |
-
----
-
-## Learning Outcomes
-
-By building this project, you will have learned:
-
-1. **Agentic AI fundamentals** — How to design a system where an AI agent acts autonomously on user intent
-2. **Anthropic Claude API** — How to make POST requests, pass prompts, and parse model responses
-3. **Prompt engineering** — Role prompting, output constraints, and JSON schema enforcement
-4. **Structured output parsing** — Handling LLM-generated JSON safely in production code
-5. **Frontend development** — Building accessible, animated, responsive UIs with vanilla HTML/CSS/JS
-6. **Error handling** — Gracefully managing network failures and malformed AI outputs
-7. **Design thinking** — Applying typography, colour, and layout to create a polished user experience
-
----
-
-## References
-
-- [Anthropic Claude API Documentation](https://docs.anthropic.com)
-- [Claude Models Overview](https://docs.anthropic.com/en/docs/about-claude/models)
-- [Prompt Engineering Guide](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview)
-- [Agentic AI Overview — Anthropic](https://www.anthropic.com/research)
-- [Tabler Icons](https://tabler.io/icons)
-- [Google Fonts — Playfair Display](https://fonts.google.com/specimen/Playfair+Display)
-- [Google Fonts — DM Sans](https://fonts.google.com/specimen/DM+Sans)
-
----
-
-> **Project by:** [Your Name]  
-> **Course / Module:** Agentic AI  
-> **Submission Date:** June 2026  
-> **Model Used:** Claude Sonnet 4 (`claude-sonnet-4-20250514`)
-
+The AI-Powered College Library Book Recommender demonstrates how modern AI techniques can be used to build intelligent recommendation systems. By combining semantic search with LLM-powered explanations, the system provides not only relevant recommendations but also transparent reasoning behind them, creating a more informative and user-friendly library experience.
