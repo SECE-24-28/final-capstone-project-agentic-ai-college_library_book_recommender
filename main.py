@@ -1,5 +1,4 @@
-def main():
-    print("Hello from final-capstone-project-agentic-ai-college-library-book-recommender!")
+from web_app import main
 
 
 if __name__ == "__main__":

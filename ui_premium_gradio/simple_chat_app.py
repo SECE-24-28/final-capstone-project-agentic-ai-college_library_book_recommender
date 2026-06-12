@@ -87,15 +87,15 @@ def answer_question(message: str, history):
 if __name__ == "__main__":
     custom_css = """
     :root { color-scheme: dark; }
-    body { background: linear-gradient(135deg, #040b16 0%, #111827 45%, #172554 100%); font-family: Inter, Arial, sans-serif; }
+    body { background: radial-gradient(1000px 500px at 20% -10%, rgba(124, 92, 255, 0.15), transparent 50%), radial-gradient(900px 450px at 90% 10%, rgba(34, 211, 238, 0.1), transparent 50%), #090d16; font-family: Inter, Arial, sans-serif; }
     .gradio-container { max-width: 1200px; }
     .main { padding-top: 6px; }
-    .panel { border: 1px solid rgba(148,163,184,0.18); border-radius: 24px; background: rgba(15, 23, 42, 0.88); box-shadow: 0 18px 40px rgba(15,23,42,0.35); }
-    .chatbot { border-radius: 20px !important; background: rgba(248,250,252,0.96) !important; border: 1px solid rgba(148,163,184,0.18) !important; }
-    .message.user { background: linear-gradient(135deg, #2563eb, #7c3aed) !important; border-radius: 18px 18px 4px 18px !important; color: #ffffff !important; }
-    .message.bot { background: linear-gradient(135deg, #ffffff, #eef2ff) !important; color: #111827 !important; border: 1px solid rgba(148,163,184,0.25) !important; border-radius: 18px 18px 18px 4px !important; box-shadow: 0 8px 18px rgba(148,163,184,0.18) !important; }
-    textarea, input { border-radius: 14px !important; background: rgba(15,23,42,0.95) !important; color: #eff6ff !important; border: 1px solid rgba(148,163,184,0.18) !important; }
-    button.primary { background: linear-gradient(135deg, #7c3aed, #2563eb) !important; border: none !important; color: white !important; }
+    .panel { border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; background: rgba(15, 23, 42, 0.45); box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+    .chatbot { border-radius: 20px !important; background: rgba(15, 23, 42, 0.3) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; }
+    .message.user { background: linear-gradient(135deg, #7c5cff, #22d3ee) !important; border-radius: 18px 18px 4px 18px !important; color: #ffffff !important; }
+    .message.bot { background: rgba(255, 255, 255, 0.05) !important; color: #f1f5f9 !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 18px 18px 18px 4px !important; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3) !important; }
+    textarea, input { border-radius: 14px !important; background: rgba(255, 255, 255, 0.05) !important; color: #eff6ff !important; border: 1px solid rgba(255, 255, 255, 0.12) !important; }
+    button.primary { background: linear-gradient(135deg, #7c5cff, #22d3ee) !important; border: none !important; color: white !important; }
     """
 
     with gr.Blocks(title="Library AI Assistant") as demo:
@@ -130,4 +130,4 @@ if __name__ == "__main__":
         clear_btn.click(lambda: [], None, chatbot)
 
     demo.queue()
-    demo.launch(server_name="127.0.0.1", server_port=_find_free_port(), show_error=True, css=custom_css)
+    demo.launch(server_name="127.0.0.1", server_port=_find_free_port(), show_error=True, css=custom_css, js="() => { document.body.classList.add('dark'); }")

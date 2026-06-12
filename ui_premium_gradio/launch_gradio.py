@@ -14,10 +14,10 @@ def main():
 
     preferred_port = int(os.getenv("GRADIO_SERVER_PORT", "7861"))
     try:
-        demo.launch(server_name="127.0.0.1", server_port=preferred_port, show_error=True)
+        demo.launch(server_name="127.0.0.1", server_port=preferred_port, show_error=True, js="() => { document.body.classList.add('dark'); }")
     except OSError:
         fallback_port = preferred_port + 1
-        demo.launch(server_name="127.0.0.1", server_port=fallback_port, show_error=True)
+        demo.launch(server_name="127.0.0.1", server_port=fallback_port, show_error=True, js="() => { document.body.classList.add('dark'); }")
 
 
 if __name__ == "__main__":
