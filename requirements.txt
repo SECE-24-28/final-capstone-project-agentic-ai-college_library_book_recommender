@@ -1,4 +1,5 @@
 groq
+gradio
 sentence-transformers
 scikit-learn
 numpy
