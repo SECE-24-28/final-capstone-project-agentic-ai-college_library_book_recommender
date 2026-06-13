@@ -557,16 +557,37 @@ def build_summary_sections(book: dict[str, Any]) -> str:
 
 
 def explain_book(book: dict[str, Any], query: str) -> str:
+    category = str(book.get("category") or book.get("categories") or "").lower()
+    title = str(book.get("title") or "").lower()
+    query_lower = query.lower()
+
     topics = _split_terms(_first(book, "keywords", "table_of_contents"))[:3]
+    topics = [t for t in topics if len(t) > 2]
     if not topics:
-        topics = [_first(book, "category", default="the requested topic")]
+        topics = [book.get("category", "General")]
+
     audience = _split_terms(_first(book, "target_audience", default="college students"))[:1]
     audience_text = audience[0] if audience else "college students"
     difficulty = _first(book, "difficulty_level", default="Intermediate")
+
+    # Smart token-based match check
+    expanded_query = _preprocess_query(query).lower()
+    query_words = {w for w in re.findall(r"\b[a-z0-9]+\b", query_lower + " " + expanded_query) if len(w) > 1}
+    title_words = set(re.findall(r"\b[a-z0-9]+\b", title))
+    cat_words = set(re.findall(r"\b[a-z0-9]+\b", category))
+    topic_words = {w.lower() for t in topics for w in re.findall(r"\b[a-z0-9]+\b", t.lower())}
+
+    if (query_words & title_words) or (query_words & cat_words):
+        match_reason = f"✓ Strong match for '{query}'"
+    elif query_words & topic_words:
+        match_reason = f"✓ Covers topic '{query}'"
+    else:
+        match_reason = "✓ Recommended computer science resource"
+
     return "\n".join(
         [
-            f"✓ Similar to {query}",
-            f"✓ Covers {', '.join(topics)}",
+            match_reason,
+            f"✓ Focuses on: {', '.join(topics)}",
             f"✓ Popular among {audience_text}",
             f"✓ {difficulty}-level textbook",
         ]

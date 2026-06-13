@@ -70,7 +70,7 @@ def _ensure_base_columns(df: pd.DataFrame) -> pd.DataFrame:
 def _build_keywords(row: pd.Series) -> str:
     tokens = []
     tech_shorts = {"ai", "ml", "llm", "nlp", "sql", "oop", "aws", "db", "os", "git"}
-    for value in [row["title"], row["authors"], row["categories"], row["description"]]:
+    for value in [row["title"], row["categories"], row["description"]]:
         for token in _clean_text(value).replace(";", " ").replace(",", " ").replace(":", " ").split():
             token = token.strip().lower()
             token = re.sub(r"[^a-z0-9]", "", token)
