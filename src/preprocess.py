@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 import pandas as pd
+import re
 
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]

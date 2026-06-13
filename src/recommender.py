@@ -198,8 +198,10 @@ def _category_match(row: pd.Series, query: str) -> float:
 
 
 def _author_similarity(row: pd.Series, query: str) -> float:
-    author = _first(row, "author", "authors").lower()
     query_lower = query.lower()
+    if query_lower in {"ai", "ml", "llm", "nlp", "sql", "oop", "cs", "cse"}:
+        return 0.0
+    author = _first(row, "author", "authors").lower()
     if not author:
         return 0.0
     if _is_word_substring(query_lower, author) or _is_word_substring(author, query_lower):
