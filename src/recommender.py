@@ -31,6 +31,7 @@ except Exception:
     cosine_similarity = None
 
 from src.preprocess import load_books
+import pickle
 
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
@@ -44,6 +45,20 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY", "").strip()
 client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY and Groq is not None else None
 
 df = load_books()
+
+# Load precalculated SentenceTransformer model and embeddings
+try:
+    from sentence_transformers import SentenceTransformer
+    st_model = SentenceTransformer("all-MiniLM-L6-v2")
+    embeddings_path = PROJECT_DIR / "models" / "book_embeddings.pkl"
+    if embeddings_path.exists():
+        with open(embeddings_path, "rb") as f:
+            book_embeddings = pickle.load(f)
+    else:
+        book_embeddings = None
+except Exception as e:
+    st_model = None
+    book_embeddings = None
 
 
 def _clean(value: Any) -> str:
@@ -138,6 +153,13 @@ else:
     tfidf_matrix = None
 
 
+try:
+    _ratings_col = pd.to_numeric(df.get("ratings_count", pd.Series([0])), errors="coerce").fillna(0)
+    MAX_RATINGS_COUNT = float(max(_ratings_col.max(), 1.0))
+except Exception:
+    MAX_RATINGS_COUNT = 1.0
+
+
 def popularity_score(row: pd.Series | dict[str, Any]) -> float:
     stored = _as_float(row.get("popularity_score", 0))
     if stored:
@@ -145,8 +167,21 @@ def popularity_score(row: pd.Series | dict[str, Any]) -> float:
 
     rating = _as_float(row.get("average_rating", 0)) / 5.0
     ratings_count = _as_float(row.get("ratings_count", 0))
-    max_count = max(_as_float(df.get("ratings_count", pd.Series([0])).max()), 1.0)
-    return max(0.0, min(0.4 * rating + 0.6 * (ratings_count / max_count), 1.0))
+    return max(0.0, min(0.4 * rating + 0.6 * (ratings_count / MAX_RATINGS_COUNT), 1.0))
+
+
+def _is_word_substring(sub: str, full: str) -> bool:
+    sub_clean = sub.strip().lower()
+    full_clean = full.strip().lower()
+    if not sub_clean or not full_clean:
+        return False
+    # Check for whole-word boundaries or prefix matches (if length is >= 4 to avoid short acronym bugs)
+    pattern = r"\b" + re.escape(sub_clean) + r"\b"
+    if re.search(pattern, full_clean):
+        return True
+    if len(sub_clean) >= 4 and sub_clean in full_clean:
+        return True
+    return False
 
 
 def _category_match(row: pd.Series, query: str) -> float:
@@ -155,9 +190,9 @@ def _category_match(row: pd.Series, query: str) -> float:
     keywords = [term.lower() for term in _split_terms(row.get("keywords", ""))]
     if not category:
         return 0.0
-    if category in query_lower or query_lower in category:
+    if _is_word_substring(query_lower, category) or _is_word_substring(category, query_lower):
         return 1.0
-    if any(term in query_lower or query_lower in term for term in keywords):
+    if any(_is_word_substring(query_lower, term) or _is_word_substring(term, query_lower) for term in keywords):
         return 0.75
     return SequenceMatcher(None, query_lower, category).ratio() * 0.5
 
@@ -167,7 +202,7 @@ def _author_similarity(row: pd.Series, query: str) -> float:
     query_lower = query.lower()
     if not author:
         return 0.0
-    if author in query_lower or query_lower in author:
+    if _is_word_substring(query_lower, author) or _is_word_substring(author, query_lower):
         return 1.0
     return SequenceMatcher(None, query_lower, author).ratio()
 
@@ -178,6 +213,12 @@ def _availability_penalty(row: pd.Series) -> float:
 
 
 def get_book_cover(book: dict[str, Any]) -> str:
+    thumbnail = book.get("thumbnail")
+    if thumbnail and isinstance(thumbnail, str) and thumbnail.strip():
+        if thumbnail.startswith("http://"):
+            thumbnail = thumbnail.replace("http://", "https://", 1)
+        return thumbnail
+
     isbn = str(book.get("isbn") or book.get("isbn13") or "").replace("-", "").replace(" ", "")
     if isbn and len(isbn) >= 10 and not isbn.startswith("97893"):
         return f"https://covers.openlibrary.org/b/isbn/{isbn}-L.jpg"
@@ -280,6 +321,7 @@ def _book_dict(row: pd.Series, score: float | None = None) -> dict[str, Any]:
         "difficulty_level": _first(row, "difficulty_level", default="Intermediate"),
         "target_audience": _first(row, "target_audience", default="College students"),
         "table_of_contents": _first(row, "table_of_contents"),
+        "thumbnail": _first(row, "thumbnail"),
         "match_score": round(score * 100, 2) if score is not None else 100,
     }
     book["image_url"] = get_book_cover(book)
@@ -529,12 +571,50 @@ def explain_book(book: dict[str, Any], query: str) -> str:
     )
 
 
+def _preprocess_query(query: str) -> str:
+    expanded = query.strip()
+    replacements = {
+        r"\bllm\b": "large language model artificial intelligence machine learning computer science nlp",
+        r"\bllms\b": "large language models artificial intelligence machine learning computer science nlp",
+        r"\bai\b": "artificial intelligence computer science machine learning",
+        r"\bml\b": "machine learning artificial intelligence computer science",
+        r"\bnlp\b": "natural language processing artificial intelligence language model",
+        r"\bsql\b": "database SQL programming query",
+        r"\boop\b": "object-oriented programming computer science",
+        r"\bcs\b": "computer science",
+        r"\bcse\b": "computer science engineering",
+    }
+    for pattern, replacement in replacements.items():
+        expanded = re.sub(pattern, replacement, expanded, flags=re.IGNORECASE)
+    return expanded
+
+
 def recommend_books(query: str, top_n: int = 10) -> list[dict[str, Any]]:
-    if tfidf_vectorizer is not None and tfidf_matrix is not None and cosine_similarity is not None:
-        query_embedding = tfidf_vectorizer.transform([query])
+    processed_query = _preprocess_query(query)
+
+    # Use SentenceTransformer embeddings if available
+    if st_model is not None and book_embeddings is not None:
+        query_embedding = st_model.encode([processed_query], convert_to_numpy=True)
+        if len(book_embeddings) == len(df):
+            if cosine_similarity is not None:
+                semantic_scores = cosine_similarity(query_embedding, book_embeddings)[0]
+            else:
+                norm_q = np.linalg.norm(query_embedding[0])
+                norm_b = np.linalg.norm(book_embeddings, axis=1)
+                dot = np.dot(book_embeddings, query_embedding[0])
+                semantic_scores = dot / (norm_q * norm_b + 1e-9)
+        else:
+            if tfidf_vectorizer is not None and tfidf_matrix is not None and cosine_similarity is not None:
+                q_emb = tfidf_vectorizer.transform([processed_query])
+                semantic_scores = cosine_similarity(q_emb, tfidf_matrix)[0]
+            else:
+                semantic_scores = _fallback_semantic_scores(processed_query)
+    elif tfidf_vectorizer is not None and tfidf_matrix is not None and cosine_similarity is not None:
+        query_embedding = tfidf_vectorizer.transform([processed_query])
         semantic_scores = cosine_similarity(query_embedding, tfidf_matrix)[0]
     else:
-        semantic_scores = _fallback_semantic_scores(query)
+        semantic_scores = _fallback_semantic_scores(processed_query)
+
     scored: list[tuple[int, float]] = []
 
     for idx, row in df.iterrows():

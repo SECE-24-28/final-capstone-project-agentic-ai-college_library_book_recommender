@@ -57,22 +57,25 @@ def api_chat(message: str, history: list[dict[str, str]]):
 
     if backend.client is not None:
         context = "\n".join(
-            f"{i}. {item.get('title')} by {item.get('author')} ({item.get('category')}) — match {item.get('match_score', 0):.1f}%"
+            f"{i}. '{item.get('title')}' by {item.get('author')} (Category: {item.get('category')}) "
+            f"— Match: {item.get('match_score', 0):.1f}%, Shelf: {item.get('shelf', 'Not assigned')}, "
+            f"Available Copies: {item.get('copies', 0)} of {item.get('total_copies', 0)}, "
+            f"Description: {item.get('description', '')[:150]}..."
             for i, item in enumerate(results, start=1)
         )
         prompt = f"""
 You are a friendly college library assistant. Respond to the student query in a natural, helpful conversational tone.
-Refer to the matching books below to answer their request.
+Explain the reasoning for choosing each of the top 5 recommended books below.
 
 Student Query: {query}
 
-Library Matching Books:
+Recommended Books (Top 5):
 {context}
 
 Response guidelines:
-- State that you found the relevant books for the requested query and summarize what topics are represented.
-- Do NOT list the book titles, authors, or numbers (they will be displayed as beautiful cards directly below the chat).
-- Keep your response brief and concise (maximum 60 words).
+- For each book, provide a very brief, friendly sentence explaining why it was chosen / how it matches the query.
+- Make sure to explicitly include its library location (Shelf number) and the number of available copies.
+- Keep the reasoning for each book very concise and clear.
 - Maintain a warm, encouraging tone.
 """
         try:
@@ -80,7 +83,7 @@ Response guidelines:
                 model=backend.MODEL_NAME,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.4,
-                max_tokens=150,
+                max_tokens=500,
             )
             answer = response.choices[0].message.content.strip()
             return {"answer": answer, "books": results}
